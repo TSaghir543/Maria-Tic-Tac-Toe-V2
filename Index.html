@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.1/brython.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #87ceeb, #4682b4, #00ced1, #4a3f90); /* Cool gradient */
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            margin: 0;
+        }
+    
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+    
+        #start-screen, #players-name, #game-controls {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+        #start-screen {
+            display: block;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #4b0082; /* Indigo */
+        }
+        p {
+            font-size: 1.2em;
+            color: #4b0082; /* Indigo */
+        }
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            background-color: #20b2aa; /* Light sea green */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #8afbbd; /* Medium sea green */
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 0;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 2em;
+            background-color: white;
+            border: 3px solid #20b2aa; /* Light sea green */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .cell:hover {
+            background-color: #85f1f1; /* Light cyan */
+            transform: scale(1.1);
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #4b0082; /* Indigo */
+        }
+        .highlight {
+            background-color: #00fa9a; /* Medium spring green */
+            color: white;
+        }
+    </style>
+        
+</head>
+<body onload="brython()">
+    <div id="start-screen">
+        <h1>Welcome to Tic-Tac-Toe</h1>
+        <p>Enjoy a classic game of Maria's Tic-Tac-Toe!</p>
+        <p>The Working & Functionality is written by <b>Maria Sami Al-solamy</b> using <b>Python</b>.</p>
+        <p><b>Message by Maria:</b> Astro-mazing! 🚀👩🏻‍🚀🌕🛸</p>
+        <p>Hope you enjoy 😊</p>
+        <button id="next-to-name">Start Game</button>
+    </div>
+
+    <div id="players-name">
+        <h1>Enter Players' Names</h1>
+        <label for="playerX">Player X Name:</label>
+        <input type="text" id="playerX">
+        <br><br>
+        <label for="playerO">Player O Name:</label>
+        <input type="text" id="playerO">
+        <br><br>
+        <button id="start-game">Continue</button>
+    </div>
+
+    <div id="game-controls">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div id="status"></div>
+    </div>
+    
+    <script type="text/python">
+        from browser import document
+
+        ticlist = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
+        playerXname = ""
+        playerOname = ""
+        turn = ""
+        mark = "X"
+        gameover = False
+        winner = ""
+
+        def display_board():
+            cells = document.select('.cell')
+            for i, cell in enumerate(cells):
+                cell.text = ticlist[i]
+
+        def highlight_winning_cells(index1, index2, index3):
+            cells = document.select('.cell')
+            cells[index1].classList.add('highlight')
+            cells[index2].classList.add('highlight')
+            cells[index3].classList.add('highlight')
+
+        def start_game(event=None):
+            global playerXname, playerOname, turn
+            playerXname = document['playerX'].value
+            playerOname = document['playerO'].value
+            turn = playerXname
+            display_board()
+            document['game-controls'].style.display = 'block'
+            document['players-name'].style.display = 'none'
+            document['status'].text = f"\n{turn}'s turn (mark '{mark}')"
+
+        def make_move(event):
+            global turn, mark, gameover, winner, playerXname, playerOname
+            if not gameover:
+                cell = event.target
+                move = int(cell.attrs['data-index'])
+                if ticlist[move] == " ":
+                    ticlist[move] = mark
+
+                    display_board()
+
+                    if turn == playerXname:
+                        turn = playerOname
+                        mark = "O"
+                    else:
+                        turn = playerXname
+                        mark = "X"
+
+                    check_winner()
+
+                    if gameover:
+                        if winner == "X":
+                            document['status'].text = f"\nGAME OVER\nCONGRATS. {playerXname} WOOOOOOOOON!"
+                        elif winner == "O":
+                            document['status'].text = f"\nGAME OVER\nCONGRATS. {playerOname} WOOOOOOOOON!"
+                        else:
+                            document['status'].text = f"\nIT'S A TIEEEEEEEEE! 😕"
+                    else:
+                        document['status'].text = f"\n{turn}'s turn (mark '{mark}')"
+                else:
+                    document['status'].text = "Invalid move! Try again."
+
+        def check_winner():
+            global gameover, winner
+            if ticlist[0] != " "  and ticlist[0] == ticlist[4] and ticlist[4] == ticlist[8]:
+                gameover = True
+                winner = ticlist[0]
+                highlight_winning_cells(0,4,8)
+            elif ticlist[2] != " " and ticlist[2] == ticlist[4] and ticlist[4] == ticlist[6]:
+                gameover = True
+                winner = ticlist[2]
+                highlight_winning_cells(2,4,6)
+            elif ticlist[0] != " " and ticlist[0] == ticlist[1] and ticlist[1] == ticlist[2]:
+                gameover = True
+                winner = ticlist[0]
+                highlight_winning_cells(0,1,2)
+            elif ticlist[3] != " " and ticlist[3] == ticlist[4] and ticlist[4] == ticlist[5]:
+                gameover = True
+                winner = ticlist[3]
+                highlight_winning_cells(3,4,5)
+            elif ticlist[6] != " " and ticlist[6] == ticlist[7] and ticlist[7] == ticlist[8]:
+                gameover = True
+                winner = ticlist[6]
+                highlight_winning_cells(6,7,8)
+            elif ticlist[0] != " " and ticlist[0] == ticlist[3] and ticlist[3] == ticlist[6]:
+                gameover = True
+                winner = ticlist[0]
+                highlight_winning_cells(0,3,6)
+            elif ticlist[1] != " " and ticlist[1] == ticlist[4] and ticlist[4] == ticlist[7]:
+                gameover = True
+                winner = ticlist[1]
+                highlight_winning_cells(1,4,7)
+            elif ticlist[2] != " " and ticlist[2] == ticlist[5] and ticlist[5] == ticlist[8]:
+                gameover = True
+                winner = ticlist[2]
+                highlight_winning_cells(2,5,8)
+            elif ticlist.count(" ") == 0:
+                gameover = True
+                winner = ""   
+
+        def show_name_input(event):
+            document['start-screen'].style.display = 'none'
+            document['players-name'].style.display = 'block'
+
+        document['next-to-name'].bind('click', show_name_input)
+        document['start-game'].bind('click', start_game)
+        for cell in document.select('.cell'):
+            cell.bind('click', make_move)
+    </script>
+</body>
+</html>
